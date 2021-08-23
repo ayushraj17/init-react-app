@@ -1,0 +1,28 @@
+.root {
+  /* display: flex; */
+  /* justify-content: center; */
+  align-items: center;
+  padding: 1rem;
+  position: relative;
+}
+
+.parent {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2rem;
+}
+
+.children {
+  padding-left: 7rem;
+  padding-right: 0;
+  border-left: 0;
+  border-right: 0;
+  margin: 0.5rem auto;
+  box-sizing: border-box;
+}
+
+.actions {
+  position: absolute;
+  left: 1rem;
+}
