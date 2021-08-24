@@ -11,6 +11,11 @@
   align-items: center;
   justify-content: flex-start;
   gap: 2rem;
+  z-index: 100;
+  border-top: 1px solid #ddd;
+}
+.parent:last-child {
+  border-bottom: 1px solid #ddd;
 }
 
 .children {

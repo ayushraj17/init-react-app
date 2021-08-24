@@ -1,256 +1,173 @@
-import React from "react";
-import { useState } from "react";
-// import List from "./mock/list";
+import React, { useState } from "react";
 import styles from "./styles/app.module.css";
 
-const MoveButton = ({ onClick }) => {
-	return (
-		<svg
-			onClick={onClick}
-			xmlns="http://www.w3.org/2000/svg"
-			viewBox="0 0 24 24"
-			width="24"
-			height="24"
-		>
-			<path fill="none" d="M0 0h24v24H0z" />
-			<path d="M18 11V8l4 4-4 4v-3h-5v5h3l-4 4-4-4h3v-5H6v3l-4-4 4-4v3h5V6H8l4-4 4 4h-3v5z" />
-		</svg>
-	);
-};
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-const DeleteButton = ({ onClick }) => {
-	return (
-		<svg
-			onClick={onClick}
-			xmlns="http://www.w3.org/2000/svg"
-			viewBox="0 0 24 24"
-			width="24"
-			height="24"
-		>
-			<title>Delete</title>
-			<path fill="none" d="M0 0h24v24H0z" />
-			<path d="M17 6h5v2h-2v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8H2V6h5V3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3zm1 2H6v12h12V8zm-9 3h2v6H9v-6zm4 0h2v6h-2v-6zM9 4v2h6V4H9z" />
-		</svg>
-	);
-};
+import {
+  DeleteButton,
+  IndentLeftButton,
+  IndentRightButton,
+  MoveButton,
+} from "./components/button";
+import DataActions from "./components/DataActions";
 
-const IndentLeftButton = ({ onClick }) => {
-	return (
-		<svg
-			onClick={onClick}
-			xmlns="http://www.w3.org/2000/svg"
-			viewBox="0 0 24 24"
-			width="24"
-			height="24"
-		>
-			<path fill="none" d="M0 0h24v24H0z" />
-			<path d="M7.828 11H20v2H7.828l5.364 5.364-1.414 1.414L4 12l7.778-7.778 1.414 1.414z" />
-		</svg>
-	);
-};
+import data from "./mock/list";
 
-const IndentRightButton = ({ onClick }) => {
-	return (
-		<svg
-			onClick={onClick}
-			xmlns="http://www.w3.org/2000/svg"
-			viewBox="0 0 24 24"
-			width="24"
-			height="24"
-		>
-			<path fill="none" d="M0 0h24v24H0z" />
-			<path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z" />
-		</svg>
-	);
-};
-
-const ACTIONS = [MoveButton, IndentLeftButton, IndentRightButton, DeleteButton];
+import {
+  getItemStyle,
+  getListStyle,
+  getTextColor,
+  reorder,
+  reOrderList,
+} from "./utils";
 
 const App = () => {
-	const [list, setList] = useState(list2);
+  const [list, setList] = useState(data);
 
-	const renderParentChildren = (id) => {
-		const childrens = list
-			.filter((item) => !isNaN(item.parent))
-			.filter((item) => item.parent === id);
+  const onDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+    setList((items) =>
+      reorder(items, result.source.index, result.destination.index)
+    );
+  };
 
-		if (childrens.length === 0) return;
+  const disableRightIndent = (id, index) => {
+    let result = undefined;
+    if (index === 0) {
+      result = true;
+    }
 
-		return renderListItems(childrens, styles.children);
-	};
+    const prevItem = list[Math.max(index - 1, 0)];
+    const currentItem = list[index];
 
-	const renderListItems = (items, className) =>
-		items.map((item) => (
-			<div className={className ? className : styles.parent} key={item.id}>
-				<div className={styles.actions}>
-					<DeleteButton onClick={() => handleDelete(item)} />
-					<IndentLeftButton onClick={() => handleIndentLeft(item)} />
-					<IndentRightButton onClick={() => handleIndentRight(item)} />
-				</div>
-				{item.id}
-				<input value={item.value} id={item.id} onChange={handleInputChange} />
-				{renderParentChildren(item.id)}
-			</div>
-		));
+    if (currentItem.order - prevItem.order === 1) {
+      result = true;
+    }
 
-	const handleIndentLeft = (itemToBeIndented) => {
-		setList((prevState) => {
-			const parentItem = prevState
-				// .slice()
-				// .reverse()
-				.find((item) => item.id === itemToBeIndented?.parent);
+    return result;
+  };
 
-			return prevState.map((item) => {
-				if (item.id === itemToBeIndented.id) {
-					itemToBeIndented.parent = parentItem?.parent;
-				}
-				return item;
-			});
-		});
-	};
+  const handleIndentLeft = (id) =>
+    setList(
+      list.map((item) => {
+        if (item.id === id) {
+          item.order--;
+          return item;
+        }
+        return item;
+      })
+    );
 
-	const handleIndentRight = (itemToBeIndented) => {
-		setList((prevState) => {
-			let closest = Math.max(
-				...prevState
-					.map((item) => item.id)
-					.filter((id) => id < itemToBeIndented.id)
-			);
-			console.log({ closest, item: itemToBeIndented.id });
+  const handleIndentRight = (id) =>
+    setList(
+      list.map((item) => {
+        if (item.id === id) {
+          item.order++;
+          return item;
+        }
+        return item;
+      })
+    );
 
-			const sibling = prevState
-				// .slice()
-				// .reverse()
-				.find((item) => item.id === closest);
-			// .find((item) => item.parent === itemToBeIndented?.parent);
-			// .filter((item) => item.id !== itemToBeIndented.id)
+  const handleDelete = (id) => {
+    const itemToDelete = list.find((item) => item.id === id);
+    const indexOfItemToDelete = list.indexOf(itemToDelete);
 
-			console.log(JSON.stringify({ sibling }, null, 2));
-			console.log(JSON.stringify({ itemToBeIndented }, null, 2));
+    let index = 0;
+    let finalList = list;
+    // Deleting the child if/any
+    while (index < list.length) {
+      if (index > indexOfItemToDelete) {
+        const item = list[index];
 
-			// if (sibling.parent === itemToBeIndented.parent) {
-			//   console.log("same parent");
-			//   prevState.map((item))
-			// }
+        if (item.order > itemToDelete.order) {
+          // console.log(item, "if");
+          finalList = finalList.filter((listItem) => listItem.id !== item.id);
+        } else {
+          // console.log(item, "else");
+          break;
+        }
+      }
+      index++;
+    }
 
-			return prevState.map((item) => {
-				if (item.id === itemToBeIndented.id) {
-					if (sibling.id !== item.id) {
-						console.log("no parent");
-						itemToBeIndented.parent = sibling?.parent ?? sibling.id;
-					}
-					if (
-						!isNaN(sibling.parent) &&
-						!isNaN(itemToBeIndented.id) &&
-						sibling.parent === itemToBeIndented.parent
-					) {
-						console.log("same parent");
-						// itemToBeIndented.parent = sibling.id;
-					}
-				}
-				return item;
-			});
-		});
-	};
+    // Deleting the item itself
+    setList(finalList.filter((listItem) => listItem.id !== itemToDelete.id));
+  };
 
-	const handleDelete = (itemToDeleted) => {
-		setList((prevState) =>
-			prevState.filter((item) => item.id !== itemToDeleted.id)
-		);
+  const handleInputChange = (e) => {
+    const id = e.target.id;
+    const value = e.target.value;
 
-		const childrens = list.filter((item) => item.parent === itemToDeleted.id);
+    setList((prevState) => {
+      return prevState.map((item) => {
+        if (item.id === id) {
+          item.value = value;
+          return item;
+        }
+        return item;
+      });
+    });
+  };
 
-		if (childrens.length) {
-			childrens.map((item) => handleDelete(item));
-		}
-	};
+  return (
+    <>
+      <DataActions data={list} setData={setList} />
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="droppable">
+          {(provided, snapshot) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              style={getListStyle(snapshot.isDraggingOver)}
+            >
+              {reOrderList(list).map((item, index) => (
+                <Draggable key={item.id} draggableId={item.id} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      style={getItemStyle(
+                        snapshot.isDragging,
+                        provided.draggableProps.style
+                      )}
+                      className={styles.parent}
+                    >
+                      {/* Actions */}
+                      <div>
+                        <MoveButton {...provided.dragHandleProps} />
+                        <IndentLeftButton
+                          onClick={() => handleIndentLeft(item.id)}
+                          disabled={item.order === 0}
+                        />
+                        <IndentRightButton
+                          onClick={() => handleIndentRight(item.id)}
+                          disabled={disableRightIndent(item.id, index)}
+                        />
+                        <DeleteButton onClick={() => handleDelete(item.id)} />
+                      </div>
 
-	const handleInputChange = (e) => {
-		const id = e.target.id;
-		const value = e.target.value;
-
-		setList((prevState) => {
-			return prevState.map((item) => {
-				if (item.id === Number(id)) {
-					item.value = value;
-					return item;
-				}
-				return item;
-			});
-		});
-	};
-
-	return (
-		<div className={styles.root} id="root">
-			<button onClick={() => setList(list2)}>reset</button>
-			{renderListItems(list.filter((item) => item.parent === undefined))}
-		</div>
-	);
+                      <input
+                        style={{
+                          marginLeft: `calc(${item.order * 3}rem)`,
+                          color: getTextColor(item.order),
+                        }}
+                        value={item.value}
+                        id={item.id}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    </>
+  );
 };
 
 export default App;
-
-const list2 = [
-	// {
-	// 	id: 1,
-	// 	value: "Read some news",
-	// },
-	// {
-	// 	id: 2,
-	// 	value: "Go out for a walk",
-	// },
-	// {
-	// 	id: 3,
-	// 	value: "Do some exercise",
-	// },
-	// {
-	// 	id: 4,
-	// 	value: "Watch tutorials on YouTube",
-	// },
-	{
-		id: 5,
-		value: "Netflix and chill",
-		// parent: undefined,
-	},
-	{
-		id: 6,
-		value: "Read a book",
-		// parent: undefined,
-	},
-
-	{
-		id: 7,
-		value: "Turn a page",
-		// parent: 6,
-	},
-	{
-		id: 8,
-		value: "Make Summary",
-		// parent: 6,
-	},
-	{
-		id: 9,
-		value: "Pick up marker",
-		// parent: 8,
-	},
-	{
-		id: 10,
-		value: "Scribble",
-		// parent: 9,
-	},
-	{
-		id: 11,
-		value: "Dot",
-		// parent: 9,
-	},
-	{
-		id: 12,
-		value: "yellow",
-		// parent: 11,
-	},
-	{
-		id: 13,
-		value: "red",
-		// parent: 11,
-	},
-];

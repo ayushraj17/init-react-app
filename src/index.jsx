@@ -2,15 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./styles/index.css";
 import App from "./App";
-import Curriculum from "./Curriculum";
-import { Drag } from "./Drag";
 
 ReactDOM.render(
   <React.StrictMode>
-    {/* <App /> */}
-    <div style={{ display: "flex", gap: "10rem" }}>
-      {/* <Curriculum /> */}
-      <Drag />
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <App />
     </div>
   </React.StrictMode>,
   document.getElementById("root")

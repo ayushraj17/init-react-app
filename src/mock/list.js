@@ -1,40 +1,49 @@
-const List = {
-	list: [
-		{
-			id: 1,
-			title: "Read some news",
-		},
-		{
-			id: 2,
-			title: "Go out for a walk",
-		},
-		{
-			id: 3,
-			title: "Do some exercise",
-		},
-		{
-			id: 4,
-			title: "Watch tutorials on YouTube",
-		},
-		{
-			id: 5,
-			title: "Netflix and chill",
-		},
-		{
-			id: 6,
-			title: "Read a book",
-		},
-	],
-	getList: function () {
-		return (
-			(localStorage.getItem("theList") &&
-				JSON.parse(localStorage.getItem("theList"))) ||
-			this.list
-		);
-	},
-	saveList: (list) => {
-		localStorage.setItem("theList", JSON.stringify(list));
-	},
-};
+import uuid from "react-uuid";
 
-export default List;
+const list = [
+  {
+    id: uuid(),
+    value: "Netflix and chill",
+    order: 0,
+  },
+  {
+    id: uuid(),
+    value: "Read a book",
+    order: 0,
+  },
+
+  {
+    id: uuid(),
+    value: "Turn a page",
+    order: 1,
+  },
+  {
+    id: uuid(),
+    value: "Make Summary",
+    order: 1,
+  },
+  {
+    id: uuid(),
+    value: "Pick up marker",
+    order: 2,
+  },
+
+  {
+    id: uuid(),
+    value: "Scribble",
+    order: 3,
+  },
+
+  {
+    id: uuid(),
+    value: "Dot",
+    order: 1,
+  },
+  {
+    id: uuid(),
+    value: "yellow",
+    order: 2,
+  },
+];
+
+export default list;
