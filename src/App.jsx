@@ -29,12 +29,17 @@ const App = () => {
       return;
     }
 
-    setList((items) =>
-      reorder(items, result.source.index, result.destination.index)
-    );
-
-    getChildren(result.source.index).map((index) =>
-      setList((items) => reorder(items, index, result.destination.index + 1))
+    [result.source.index, ...getChildren(result.source.index)].forEach(
+      (index, iterator) =>
+        setList((items) =>
+          reorder(
+            items,
+            index,
+            result.destination.index -
+              getChildren(result.source.index) +
+              iterator
+          )
+        )
     );
   };
 
@@ -55,25 +60,29 @@ const App = () => {
   };
 
   const handleIndentLeft = (id) =>
-    setList(
-      list.map((item) => {
-        if (item.id === id) {
-          item.order--;
+    reOrderList(
+      setList(
+        list.map((item) => {
+          if (item.id === id) {
+            item.order--;
+            return item;
+          }
           return item;
-        }
-        return item;
-      })
+        })
+      )
     );
 
   const handleIndentRight = (id) =>
     setList(
-      list.map((item) => {
-        if (item.id === id) {
-          item.order++;
+      reOrderList(
+        list.map((item) => {
+          if (item.id === id) {
+            item.order++;
+            return item;
+          }
           return item;
-        }
-        return item;
-      })
+        })
+      )
     );
 
   const getChildren = (moveItemIndex) => {
@@ -123,7 +132,11 @@ const App = () => {
     }
 
     // Deleting the item itself
-    setList(finalList.filter((listItem) => listItem.id !== itemToDelete.id));
+    setList(
+      reOrderList(
+        finalList.filter((listItem) => listItem.id !== itemToDelete.id)
+      )
+    );
   };
 
   const handleInputChange = (e) => {
