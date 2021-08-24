@@ -28,8 +28,13 @@ const App = () => {
     if (!result.destination) {
       return;
     }
+
     setList((items) =>
       reorder(items, result.source.index, result.destination.index)
+    );
+
+    getChildren(result.source.index).map((index) =>
+      setList((items) => reorder(items, index, result.destination.index + 1))
     );
   };
 
@@ -71,12 +76,36 @@ const App = () => {
       })
     );
 
+  const getChildren = (moveItemIndex) => {
+    const itemToDelete = list[moveItemIndex];
+    const indexOfItemToDelete = moveItemIndex;
+
+    let index = 0;
+    let childrenIndices = [];
+    // Deleting the child if/any
+    while (index < list.length) {
+      if (index > indexOfItemToDelete) {
+        const item = list[index];
+        if (item.order > itemToDelete.order) {
+          // console.log(item, "if");
+          childrenIndices.push(index);
+        } else {
+          // console.log(item, "else");
+          break;
+        }
+      }
+      index++;
+    }
+    return childrenIndices;
+  };
+
   const handleDelete = (id) => {
     const itemToDelete = list.find((item) => item.id === id);
     const indexOfItemToDelete = list.indexOf(itemToDelete);
 
     let index = 0;
     let finalList = list;
+
     // Deleting the child if/any
     while (index < list.length) {
       if (index > indexOfItemToDelete) {
@@ -148,7 +177,6 @@ const App = () => {
                         />
                         <DeleteButton onClick={() => handleDelete(item.id)} />
                       </div>
-
                       <input
                         style={{
                           marginLeft: `calc(${item.order * 3}rem)`,
