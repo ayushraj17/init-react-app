@@ -29,17 +29,8 @@ const App = () => {
       return;
     }
 
-    [result.source.index, ...getChildren(result.source.index)].forEach(
-      (index, iterator) =>
-        setList((items) =>
-          reorder(
-            items,
-            index,
-            result.destination.index -
-              getChildren(result.source.index) +
-              iterator
-          )
-        )
+    setList((items) =>
+      reorder(items, result.source.index, result.destination.index)
     );
   };
 
@@ -60,53 +51,26 @@ const App = () => {
   };
 
   const handleIndentLeft = (id) =>
-    reOrderList(
-      setList(
-        list.map((item) => {
-          if (item.id === id) {
-            item.order--;
-            return item;
-          }
+    setList(
+      list.map((item) => {
+        if (item.id === id) {
+          item.order--;
           return item;
-        })
-      )
+        }
+        return item;
+      })
     );
 
   const handleIndentRight = (id) =>
     setList(
-      reOrderList(
-        list.map((item) => {
-          if (item.id === id) {
-            item.order++;
-            return item;
-          }
+      list.map((item) => {
+        if (item.id === id) {
+          item.order++;
           return item;
-        })
-      )
-    );
-
-  const getChildren = (moveItemIndex) => {
-    const itemToDelete = list[moveItemIndex];
-    const indexOfItemToDelete = moveItemIndex;
-
-    let index = 0;
-    let childrenIndices = [];
-    // Deleting the child if/any
-    while (index < list.length) {
-      if (index > indexOfItemToDelete) {
-        const item = list[index];
-        if (item.order > itemToDelete.order) {
-          // console.log(item, "if");
-          childrenIndices.push(index);
-        } else {
-          // console.log(item, "else");
-          break;
         }
-      }
-      index++;
-    }
-    return childrenIndices;
-  };
+        return item;
+      })
+    );
 
   const handleDelete = (id) => {
     const itemToDelete = list.find((item) => item.id === id);
@@ -132,11 +96,7 @@ const App = () => {
     }
 
     // Deleting the item itself
-    setList(
-      reOrderList(
-        finalList.filter((listItem) => listItem.id !== itemToDelete.id)
-      )
-    );
+    setList(finalList.filter((listItem) => listItem.id !== itemToDelete.id));
   };
 
   const handleInputChange = (e) => {
