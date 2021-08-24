@@ -33,7 +33,7 @@ export const DeleteButton = (props) => {
 export const IndentLeftButton = (props) => {
   return (
     <button className="tooltip" {...props}>
-      <span className="tooltip-text">Indent</span>
+      <span className="tooltip-text">Outdent</span>
       <ArrowLeftIcon />
     </button>
   );
